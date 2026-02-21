@@ -132,12 +132,14 @@ Agent usage:
 
 ## Anonymity and data handling
 
-This repo must remain anonymous and contain no sensitive data:
+This repo must not contain sensitive data:
 
 - synthetic data only
-- no internal URLs/identifiers
-- no personal names or identifying emails
-- no screenshots or logs that could reveal identity or internal systems
+- No secrets (tokens, API keys, private keys)
+- No internal URLs / repo links / tickets
+- No real datasets (only synthetic or publicly licensed)
+- No personal data (PII), even in examples
+- No employer-internal docs copied verbatim unless already public
 
 If unsure, omit the material and leave a TODO.
 
