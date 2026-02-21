@@ -35,6 +35,8 @@ Expected files (minimum kernel):
 - `docs/risk-notes.md`
 - `docs/traceability.md`
 
+For agent conventions and enforcement (e.g. not adding/renaming these without alignment), see **AGENTS.md** § Repo conventions.
+
 ## Architecture
 
 ### Two-layer model
@@ -47,7 +49,7 @@ Expected files (minimum kernel):
 
 **Evidence factory (enforcement)**
 
-- Trains a small model (Mode A).
+- Trains a small model.
 - Runs evaluation.
 - Generates supply-chain artifacts (SBOM, vulnerability scan).
 - Assembles a deterministic evidence bundle with a hash manifest.
@@ -123,25 +125,11 @@ Guidelines:
 - use minimal, repo-scoped GitHub credentials
 - do not store tokens in tracked files
 
-Agent usage:
-
-- branch-per-task, diff-first
-- minimal diffs; no refactors unless requested
-- include verification steps with each change
-- treat agent output as untrusted until CI passes
+For how AI agents should work in this repo (branching, diffs, verification, change policy), see **AGENTS.md**.
 
 ## Anonymity and data handling
 
-This repo must not contain sensitive data:
-
-- synthetic data only
-- No secrets (tokens, API keys, private keys)
-- No internal URLs / repo links / tickets
-- No real datasets (only synthetic or publicly licensed)
-- No personal data (PII), even in examples
-- No employer-internal docs copied verbatim unless already public
-
-If unsure, omit the material and leave a TODO.
+This repo must not contain sensitive data: synthetic data only; no secrets, internal URLs, PII, or internal docs. Full list and agent enforcement: **AGENTS.md** § Anonymity and data handling. If unsure, omit the material and leave a TODO.
 
 ## Local quickstart (example)
 
