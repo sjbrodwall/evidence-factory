@@ -17,6 +17,8 @@ def main() -> None:
     ap.add_argument("--docs-dir", default="docs")
     ap.add_argument("--evidence-dir", default="evidence")
     ap.add_argument("--out-tgz", default="evidence/evidence-pack.tgz")
+    ap.add_argument("--git-sha", default=None, help="Git commit SHA (e.g. from CI); omitted if not set")
+    ap.add_argument("--ci-run-url", default=None, help="URL of the CI run that produced this pack; omitted if not set")
     args = ap.parse_args()
 
     build_dir = Path(args.build_dir)
@@ -66,6 +68,10 @@ def main() -> None:
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "files": files,
     }
+    if args.git_sha is not None:
+        manifest["git_sha"] = args.git_sha
+    if args.ci_run_url is not None:
+        manifest["ci_run_url"] = args.ci_run_url
 
     with (evidence_dir / "manifest.json").open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, sort_keys=True)

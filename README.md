@@ -60,7 +60,7 @@ For agent conventions and enforcement (e.g. not adding/renaming these without al
 
 Each CI run produces:
 
-- `evidence/manifest.json` — list of included files with SHA256 hashes (the primary receipt)
+- `evidence/manifest.json` — list of included files with SHA256 hashes (the primary receipt); in CI also includes `git_sha` and `ci_run_url` for auditability
 - model artifacts + metadata (`model.joblib`, `train_meta.json`, etc.)
 - `eval.json` — evaluation report tied to the model artifact
 - governance docs copied from `docs/`
