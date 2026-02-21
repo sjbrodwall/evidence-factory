@@ -30,6 +30,9 @@ jobs:
       - name: Eval
         run: python src/eval.py --build-dir build --out build/eval.json
 
+      - name: Prepare evidence directory
+        run: mkdir -p evidence
+
       # SBOM into evidence/
       - name: Generate SBOM (SPDX JSON)
         uses: anchore/sbom-action@v0
