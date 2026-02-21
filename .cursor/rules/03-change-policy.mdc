@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+# Evidence Factory - Change Policy
+
+- Prefer small diffs.
+- If a change is >200 lines OR touches >5 files, propose a plan first (do not implement yet).
+- Do not refactor unrelated code.
+- Do not rename things “for style” unless explicitly asked.

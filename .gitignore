@@ -1,0 +1,6 @@
+.cursor-cache/
+build/
+evidence/
+.venv/
+__pycache__/
+*.pyc

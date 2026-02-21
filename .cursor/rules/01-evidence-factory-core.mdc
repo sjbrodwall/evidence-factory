@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+
+# Evidence Factory — Core Principles
+
+You are working on the Evidence Factory project.
+
+## Non-negotiables
+- Always preserve provenance: every claim must map to source_id + span/quote + extraction metadata.
+- Never invent citations or sources.
+- Output structured data (JSON) for extraction results.
+
+## Engineering quality
+- When coding, include clear error messages and deterministic validation.
+- Write tests or eval cases for non-trivial logic.
+- If uncertain about schema, ask to open docs/schema.md and follow it.

@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+
+# Evidence Factory — Workflow
+
+Follow this workflow in responses:
+
+1) Restate the goal in one sentence.
+2) Identify the relevant files.
+3) Propose a minimal change.
+4) Produce a diff-ready edit.
+5) Add/adjust tests or eval.
