@@ -66,7 +66,7 @@ jobs:
           conftest --version
 
       - name: Policy gate (manifest)
-        run: conftest test evidence/manifest.json --policy policy
+        run: conftest test evidence/manifest.json --policy policy --namespace evidence
 
       - name: Upload evidence artifacts
         uses: actions/upload-artifact@v4
