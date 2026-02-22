@@ -52,7 +52,7 @@ jobs:
           output: "evidence/trivy.sarif"
           severity: "HIGH,CRITICAL"
           ignore-unfixed: true
-          exit-code: "0"
+          exit-code: "1"
 
       - name: Assemble evidence pack
         run: |
