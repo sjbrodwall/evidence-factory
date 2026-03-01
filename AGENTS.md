@@ -54,9 +54,9 @@ Tests must verify the **actual guarantee**, not only the scaffolding around it. 
 
 ## Repo conventions
 
-- **Governance inputs:** The `docs/` folder is for governance inputs only (bundled as evidence). Filenames are a **stable API**. Required files: `docs/intended-purpose.md`, `docs/human-oversight.md`, `docs/data-governance.md`, `docs/risk-notes.md`, `docs/traceability.md`. Do not add or rename required docs without alignment with the policy and README.
-- **Engineering narrative** lives in the README, not in `docs/`.
-- **Filenames:** `docs/` = lowercase kebab-case; Python = snake_case; workflows (e.g. under `.github/workflows/`) = kebab-case.
+- **Governance inputs:** The `governance/` folder holds JSON governance inputs only (bundled as evidence). Filenames are a **stable API**. Required files: `governance/intended-purpose.json`, `governance/human-oversight.json`, `governance/data-governance.json`, `governance/risk-notes.json`, `governance/traceability.json`. Do not add or rename required governance files without alignment with the policy and README.
+- **Engineering narrative** lives in the README, not in `governance/`.
+- **Filenames:** `governance/` = lowercase kebab-case; Python = snake_case; workflows (e.g. under `.github/workflows/`) = kebab-case.
 
 ---
 

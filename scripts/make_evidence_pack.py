@@ -14,7 +14,7 @@ def sha256_file(path: Path) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--build-dir", default="build")
-    ap.add_argument("--docs-dir", default="docs")
+    ap.add_argument("--governance-dir", default="governance")
     ap.add_argument("--evidence-dir", default="evidence")
     ap.add_argument("--out-tgz", default="evidence/evidence-pack.tgz")
     ap.add_argument("--git-sha", default=None, help="Git commit SHA (e.g. from CI); omitted if not set")
@@ -22,15 +22,15 @@ def main() -> None:
     args = ap.parse_args()
 
     build_dir = Path(args.build_dir)
-    docs_dir = Path(args.docs_dir)
+    governance_dir = Path(args.governance_dir)
     evidence_dir = Path(args.evidence_dir)
 
     # Only remove what this script owns; leave e.g. sbom.spdx.json / trivy.sarif from CI
     evidence_dir.mkdir(parents=True, exist_ok=True)
     if (evidence_dir / "model").exists():
         shutil.rmtree(evidence_dir / "model")
-    if (evidence_dir / "docs").exists():
-        shutil.rmtree(evidence_dir / "docs")
+    if (evidence_dir / "governance").exists():
+        shutil.rmtree(evidence_dir / "governance")
     if (evidence_dir / "eval.json").exists():
         (evidence_dir / "eval.json").unlink()
 
@@ -43,8 +43,8 @@ def main() -> None:
     # copy eval
     shutil.copy2(build_dir / "eval.json", evidence_dir / "eval.json")
 
-    # copy docs (these are your “human-readable governance” artifacts)
-    shutil.copytree(docs_dir, evidence_dir / "docs")
+    # copy governance (these are your governance artifacts)
+    shutil.copytree(governance_dir, evidence_dir / "governance")
 
     # NOTE: SBOM and Trivy outputs are expected to already exist in evidence_dir root
     # when running in CI. Locally you can skip them; CI will add them.

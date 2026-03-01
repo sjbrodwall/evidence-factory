@@ -61,7 +61,7 @@ jobs:
 
       - name: Assemble evidence pack
         run: |
-          python scripts/make_evidence_pack.py --build-dir build --docs-dir docs --evidence-dir evidence --out-tgz evidence/evidence-pack.tgz \
+          python scripts/make_evidence_pack.py --build-dir build --evidence-dir evidence --out-tgz evidence/evidence-pack.tgz \
             --git-sha "${{ github.sha }}" \
             --ci-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
