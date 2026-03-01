@@ -1,5 +1,6 @@
 """Tests for evidence pack assembly: manifest covers exactly the expected files."""
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -164,3 +165,40 @@ def test_manifest_includes_ci_artifacts_when_present(tmp_path: Path) -> None:
     paths = {f["path"] for f in manifest["files"]}
     expected = EXPECTED_PATHS_LOCAL | {"sbom.spdx.json", "trivy.sarif"}
     assert paths == expected, f"Expected {expected}, got {paths}"
+
+
+def test_manifest_hashes_match_file_contents(tmp_path: Path) -> None:
+    """SHA256 hashes in the manifest must match the actual file contents."""
+    build_dir = tmp_path / "build"
+    docs_dir = tmp_path / "docs"
+    evidence_dir = tmp_path / "evidence"
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+
+    _minimal_build_dir(build_dir, REPO_ROOT)
+    _minimal_docs_dir(docs_dir)
+
+    _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "make_evidence_pack.py"),
+            "--build-dir",
+            str(build_dir),
+            "--docs-dir",
+            str(docs_dir),
+            "--evidence-dir",
+            str(evidence_dir),
+            "--out-tgz",
+            str(evidence_dir / "evidence-pack.tgz"),
+        ],
+        REPO_ROOT,
+    )
+
+    manifest = json.loads((evidence_dir / "manifest.json").read_text(encoding="utf-8"))
+
+    for entry in manifest["files"]:
+        file_path = evidence_dir / entry["path"]
+        assert file_path.exists(), f"manifest references non-existent file: {entry['path']}"
+        actual_hash = hashlib.sha256(file_path.read_bytes()).hexdigest()
+        assert actual_hash == entry["sha256"], (
+            f"hash mismatch for {entry['path']}: manifest says {entry['sha256']}, file is {actual_hash}"
+        )
