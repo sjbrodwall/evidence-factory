@@ -30,12 +30,13 @@ This POC supports parts of AI Act–style obligations (traceability, documentati
 ## Repository layout
 
 - `src/` — training + evaluation code
-- `scripts/` — evidence assembly utilities
+- `scripts/` — evidence assembly utilities (`make_evidence_pack.py`, `run_policy_gate.py`)
 - `docs/` — **governance inputs** (bundled + hashed + gated)
 - `policy/` — OPA/Rego policies executed by Conftest
 - `.github/workflows/` — CI pipelines
-- `evidence/` — generated artifacts (never hand-edited; usually gitignored)
-- `build/` — generated model artifacts (usually gitignored)
+- `tests/` — Python tests (pytest) for evidence assembly
+- `evidence/` — generated artifacts (never hand-edited; gitignored)
+- `build/` — generated model artifacts (gitignored)
 
 ## Governance inputs (`docs/`)
 
