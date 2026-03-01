@@ -126,6 +126,7 @@ This repo follows a reproducible / declarative / supply-chain–aware style:
 - least privilege (minimize and scope credentials)
 - fail fast / loud / actionable
 - receipts before dashboards
+- test the guarantee, not the structure
 - strict on evidence presence before strict thresholds (initially)
 
 ## Development workflow
