@@ -4,6 +4,20 @@ This repository is a proof-of-concept **evidence factory** for ML systems: it tu
 
 **Design goal:** make governance constraints compile.
 
+## Table of contents
+
+- [Scope](#scope)
+- [Repository layout](#repository-layout)
+- [Governance inputs (`docs/`)](#governance-inputs-docs)
+- [Architecture](#architecture)
+- [Policy-as-code gates](#policy-as-code-gates)
+- [CI workflow (high level)](#ci-workflow-high-level)
+- [Engineering principles](#engineering-principles)
+- [Development workflow](#development-workflow)
+- [Testing strategy](#testing-strategy)
+- [Anonymity and data handling](#anonymity-and-data-handling)
+- [Local quickstart (example)](#local-quickstart-example)
+
 ## Scope
 
 - **Low-risk** POC scenario (advisory/drafting use, human review required).
