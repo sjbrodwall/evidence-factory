@@ -160,6 +160,8 @@ This repo must not contain sensitive data: synthetic data only; no secrets, inte
 
 ## Local quickstart (example)
 
+Use **Python 3.13** (CI and pinned deps use 3.13; see `.python-version`).
+
 ```bash
 python -m venv .venv
 # Linux/macOS:
