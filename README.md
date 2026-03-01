@@ -4,6 +4,20 @@ This repository is a proof-of-concept **evidence factory** for ML systems: it tu
 
 **Design goal:** make governance constraints compile.
 
+## Table of contents
+
+- [Scope](#scope)
+- [Repository layout](#repository-layout)
+- [Governance inputs (`docs/`)](#governance-inputs-docs)
+- [Architecture](#architecture)
+- [Policy-as-code gates](#policy-as-code-gates)
+- [CI workflow (high level)](#ci-workflow-high-level)
+- [Engineering principles](#engineering-principles)
+- [Development workflow](#development-workflow)
+- [Testing strategy](#testing-strategy)
+- [Anonymity and data handling](#anonymity-and-data-handling)
+- [Local quickstart (example)](#local-quickstart-example)
+
 ## Scope
 
 - **Low-risk** POC scenario (advisory/drafting use, human review required).
@@ -126,6 +140,17 @@ Guidelines:
 - do not store tokens in tracked files
 
 For how AI agents should work in this repo (branching, diffs, verification, change policy), see **AGENTS.md**.
+
+## Testing strategy
+
+Tests are prioritized where the value proposition lives: **evidence assembly** and **policy-as-code**.
+
+- **Evidence pack** — Tests for `scripts/make_evidence_pack.py` (and equivalent logic) should assert that the manifest covers exactly the expected files (required docs, model artifacts, eval report, and when present SBOM/Trivy). That protects the evidence-assembly contract.
+- **Policy** — Rego/Conftest tests for `policy/evidence.rego` ensure gates are not silently broken by refactors; policy is the main enforcement surface.
+
+The ML code in `src/` (train + eval) is a minimal placeholder so the pipeline has model artifacts to bundle. Tests for train determinism or eval report schema are **optional contract tests** for that placeholder behavior; they are not the primary testing focus.
+
+**Run tests locally:** `pip install -r requirements-dev.txt` then `python -m pytest tests/ -v`. Policy unit tests: `conftest verify --policy policy` (requires [Conftest](https://www.conftest.dev/)).
 
 ## Anonymity and data handling
 
