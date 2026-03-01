@@ -127,6 +127,17 @@ Guidelines:
 
 For how AI agents should work in this repo (branching, diffs, verification, change policy), see **AGENTS.md**.
 
+## Testing strategy
+
+Tests are prioritized where the value proposition lives: **evidence assembly** and **policy-as-code**.
+
+- **Evidence pack** — Tests for `scripts/make_evidence_pack.py` (and equivalent logic) should assert that the manifest covers exactly the expected files (required docs, model artifacts, eval report, and when present SBOM/Trivy). That protects the evidence-assembly contract.
+- **Policy** — Rego/Conftest tests for `policy/evidence.rego` ensure gates are not silently broken by refactors; policy is the main enforcement surface.
+
+The ML code in `src/` (train + eval) is a minimal placeholder so the pipeline has model artifacts to bundle. Tests for train determinism or eval report schema are **optional contract tests** for that placeholder behavior; they are not the primary testing focus.
+
+**Run tests locally:** `pip install -r requirements-dev.txt` then `python -m pytest tests/ -v`. Policy unit tests: `conftest verify --policy policy` (requires [Conftest](https://www.conftest.dev/)).
+
 ## Anonymity and data handling
 
 This repo must not contain sensitive data: synthetic data only; no secrets, internal URLs, PII, or internal docs. Full list and agent enforcement: **AGENTS.md** § Anonymity and data handling. If unsure, omit the material and leave a TODO.
