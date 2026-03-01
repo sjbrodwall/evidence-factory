@@ -1,3 +1,23 @@
+Metadata-Version: 2.4
+Name: evidence-factory
+Version: 0.1.0
+Summary: Proof-of-concept evidence factory for ML systems: governance requirements into machine-verifiable evidence and policy-as-code in CI.
+License: MIT
+Keywords: evidence,governance,ml,policy-as-code
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pip-tools; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Dynamic: license-file
+
 # Evidence Factory (POC)
 
 This repository is a proof-of-concept **evidence factory** for ML systems: it turns governance requirements into **machine-verifiable evidence** and enforces them with **policy-as-code** in CI.
