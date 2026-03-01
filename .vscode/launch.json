@@ -24,7 +24,6 @@
       "program": "${workspaceFolder}/scripts/make_evidence_pack.py",
       "args": [
         "--build-dir", "build",
-        "--docs-dir", "docs",
         "--evidence-dir", "evidence",
         "--out-tgz", "evidence/evidence-pack.tgz"
       ],

@@ -6,11 +6,11 @@ required := {
   "eval.json",
   "model/model.joblib",
   "model/train_meta.json",
-  "docs/intended-purpose.md",
-  "docs/human-oversight.md",
-  "docs/data-governance.md",
-  "docs/risk-notes.md",
-  "docs/traceability.md",
+  "governance/intended-purpose.json",
+  "governance/human-oversight.json",
+  "governance/data-governance.json",
+  "governance/risk-notes.json",
+  "governance/traceability.json",
 }
 
 # In CI we also require supply-chain artifacts:
@@ -35,7 +35,7 @@ deny contains msg if {
 
 deny contains msg if {
   some f in input.files
-  startswith(f.path, "docs/")
-  f.bytes < 10
+  startswith(f.path, "governance/")
+  f.bytes < 20
   msg := sprintf("doc too small (likely empty): %s", [f.path])
 }

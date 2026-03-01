@@ -8,7 +8,7 @@ This repository is a proof-of-concept **evidence factory** for ML systems: it tu
 
 - [Scope](#scope)
 - [Repository layout](#repository-layout)
-- [Governance inputs (`docs/`)](#governance-inputs-docs)
+- [Governance inputs (`governance/`)](#governance-inputs-governance)
 - [Architecture](#architecture)
 - [Policy-as-code gates](#policy-as-code-gates)
 - [CI workflow (high level)](#ci-workflow-high-level)
@@ -30,25 +30,25 @@ This POC supports parts of AI Act–style obligations (traceability, documentati
 ## Repository layout
 
 - `src/` — training + evaluation code
-- `scripts/` — evidence assembly utilities (`make_evidence_pack.py`, `run_policy_gate.py`)
-- `docs/` — **governance inputs** (bundled + hashed + gated)
+- `scripts/` — evidence assembly utilities
+- `governance/` — **governance inputs** (JSON; bundled + hashed + gated)
 - `policy/` — OPA/Rego policies executed by Conftest
 - `.github/workflows/` — CI pipelines
 - `tests/` — Python tests (pytest) for evidence assembly
 - `evidence/` — generated artifacts (never hand-edited; gitignored)
 - `build/` — generated model artifacts (gitignored)
 
-## Governance inputs (`docs/`)
+## Governance inputs (`governance/`)
 
-The `docs/` folder is reserved for governance inputs that are treated as **required evidence** and included in the evidence bundle. Filenames are treated as a stable API.
+The `governance/` folder holds structured JSON governance inputs that are treated as **required evidence** and included in the evidence bundle. Filenames are treated as a stable API. Each file has `schema_version`, `title`, and `body`.
 
 Expected files (minimum kernel):
 
-- `docs/intended-purpose.md`
-- `docs/human-oversight.md`
-- `docs/data-governance.md`
-- `docs/risk-notes.md`
-- `docs/traceability.md`
+- `governance/intended-purpose.json`
+- `governance/human-oversight.json`
+- `governance/data-governance.json`
+- `governance/risk-notes.json`
+- `governance/traceability.json`
 
 For agent conventions and enforcement (e.g. not adding/renaming these without alignment), see **AGENTS.md** § Repo conventions.
 
@@ -78,7 +78,7 @@ Each CI run produces:
 - `evidence/manifest.json` — list of included files with SHA256 hashes (the primary receipt); in CI also includes `git_sha` and `ci_run_url` for auditability
 - model artifacts + metadata (`model.joblib`, `train_meta.json`, etc.)
 - `eval.json` — evaluation report tied to the model artifact
-- governance docs copied from `docs/`
+- governance JSON files copied from `governance/`
 - CI-only artifacts:
   - `sbom.spdx.json`
   - `trivy.sarif`
@@ -93,10 +93,10 @@ Policies live in `policy/` and are executed by **Conftest** against `evidence/ma
 Gates are intentionally strict about:
 
 - required evidence presence
-- basic structural sanity (e.g., non-empty docs)
+- basic structural sanity (e.g., non-empty governance files)
 - CI-only requirements (SBOM and vuln scan outputs)
 
-Policy failures must be **actionable** (e.g., “missing required file: docs/human-oversight.md”).
+Policy failures must be **actionable** (e.g., “missing required file: governance/human-oversight.json”).
 
 ## CI workflow (high level)
 
@@ -147,7 +147,7 @@ For how AI agents should work in this repo (branching, diffs, verification, chan
 
 Tests are prioritized where the value proposition lives: **evidence assembly** and **policy-as-code**.
 
-- **Evidence pack** — Tests for `scripts/make_evidence_pack.py` (and equivalent logic) should assert that the manifest covers exactly the expected files (required docs, model artifacts, eval report, and when present SBOM/Trivy). That protects the evidence-assembly contract.
+- **Evidence pack** — Tests for `scripts/make_evidence_pack.py` (and equivalent logic) should assert that the manifest covers exactly the expected files (required governance files, model artifacts, eval report, and when present SBOM/Trivy). That protects the evidence-assembly contract.
 - **Policy** — Rego/Conftest tests for `policy/evidence.rego` ensure gates are not silently broken by refactors; policy is the main enforcement surface.
 
 The ML code in `src/` (train + eval) is a minimal placeholder so the pipeline has model artifacts to bundle. Tests for train determinism or eval report schema are **optional contract tests** for that placeholder behavior; they are not the primary testing focus.
@@ -170,7 +170,7 @@ pip install -r requirements.txt
 
 python src/train.py --out-dir build --seed 42
 python src/eval.py --build-dir build --out build/eval.json
-python scripts/make_evidence_pack.py --build-dir build --docs-dir docs --evidence-dir evidence --out-tgz evidence/evidence-pack.tgz
+python scripts/make_evidence_pack.py --build-dir build --evidence-dir evidence --out-tgz evidence/evidence-pack.tgz
 ```
 
 **Policy (local vs CI):** The full Conftest policy requires SBOM and Trivy outputs in the evidence dir. In CI they are produced before the evidence pack is assembled. For a quick local run you can omit them; the policy gate will fail until SBOM/Trivy are present (e.g. run the full pipeline in a VM or rely on CI as source of truth).

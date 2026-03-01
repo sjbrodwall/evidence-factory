@@ -16,11 +16,11 @@ EXPECTED_PATHS_LOCAL = {
     "model/model.joblib",
     "model/train_meta.json",
     "model/test_set.npz",
-    "docs/intended-purpose.md",
-    "docs/human-oversight.md",
-    "docs/data-governance.md",
-    "docs/risk-notes.md",
-    "docs/traceability.md",
+    "governance/intended-purpose.json",
+    "governance/human-oversight.json",
+    "governance/data-governance.json",
+    "governance/risk-notes.json",
+    "governance/traceability.json",
 }
 
 
@@ -52,28 +52,29 @@ def _minimal_build_dir(build_dir: Path, repo_root: Path) -> None:
     )
 
 
-def _minimal_docs_dir(docs_dir: Path) -> None:
-    """Create minimal governance docs (content > 10 bytes for policy)."""
-    docs_dir.mkdir(parents=True, exist_ok=True)
+def _minimal_governance_dir(governance_dir: Path) -> None:
+    """Create minimal governance JSON files (content >= 20 bytes for policy)."""
+    governance_dir.mkdir(parents=True, exist_ok=True)
+    minimal = {"schema_version": "1", "title": "Placeholder", "body": "Minimal content for tests."}
     for name in [
-        "intended-purpose.md",
-        "human-oversight.md",
-        "data-governance.md",
-        "risk-notes.md",
-        "traceability.md",
+        "intended-purpose.json",
+        "human-oversight.json",
+        "data-governance.json",
+        "risk-notes.json",
+        "traceability.json",
     ]:
-        (docs_dir / name).write_text("Governance placeholder.\n", encoding="utf-8")
+        (governance_dir / name).write_text(json.dumps(minimal, indent=2), encoding="utf-8")
 
 
 def test_manifest_covers_expected_files_local(tmp_path: Path) -> None:
     """After running make_evidence_pack, manifest lists exactly the expected local paths."""
     build_dir = tmp_path / "build"
-    docs_dir = tmp_path / "docs"
+    governance_dir = tmp_path / "governance"
     evidence_dir = tmp_path / "evidence"
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
     _minimal_build_dir(build_dir, REPO_ROOT)
-    _minimal_docs_dir(docs_dir)
+    _minimal_governance_dir(governance_dir)
 
     _run(
         [
@@ -81,8 +82,8 @@ def test_manifest_covers_expected_files_local(tmp_path: Path) -> None:
             str(REPO_ROOT / "scripts" / "make_evidence_pack.py"),
             "--build-dir",
             str(build_dir),
-            "--docs-dir",
-            str(docs_dir),
+            "--governance-dir",
+            str(governance_dir),
             "--evidence-dir",
             str(evidence_dir),
             "--out-tgz",
@@ -104,12 +105,12 @@ def test_manifest_covers_expected_files_local(tmp_path: Path) -> None:
 def test_manifest_excludes_manifest_and_tgz(tmp_path: Path) -> None:
     """Manifest must not include manifest.json or evidence-pack.tgz."""
     build_dir = tmp_path / "build"
-    docs_dir = tmp_path / "docs"
+    governance_dir = tmp_path / "governance"
     evidence_dir = tmp_path / "evidence"
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
     _minimal_build_dir(build_dir, REPO_ROOT)
-    _minimal_docs_dir(docs_dir)
+    _minimal_governance_dir(governance_dir)
 
     _run(
         [
@@ -117,8 +118,8 @@ def test_manifest_excludes_manifest_and_tgz(tmp_path: Path) -> None:
             str(REPO_ROOT / "scripts" / "make_evidence_pack.py"),
             "--build-dir",
             str(build_dir),
-            "--docs-dir",
-            str(docs_dir),
+            "--governance-dir",
+            str(governance_dir),
             "--evidence-dir",
             str(evidence_dir),
             "--out-tgz",
@@ -136,14 +137,14 @@ def test_manifest_excludes_manifest_and_tgz(tmp_path: Path) -> None:
 def test_manifest_includes_ci_artifacts_when_present(tmp_path: Path) -> None:
     """When SBOM and Trivy files exist in evidence dir, they appear in the manifest."""
     build_dir = tmp_path / "build"
-    docs_dir = tmp_path / "docs"
+    governance_dir = tmp_path / "governance"
     evidence_dir = tmp_path / "evidence"
     evidence_dir.mkdir(parents=True, exist_ok=True)
     (evidence_dir / "sbom.spdx.json").write_text('{"spdxVersion": "SPDX-2.2"}', encoding="utf-8")
     (evidence_dir / "trivy.sarif").write_text('{"version": "2.1.0"}', encoding="utf-8")
 
     _minimal_build_dir(build_dir, REPO_ROOT)
-    _minimal_docs_dir(docs_dir)
+    _minimal_governance_dir(governance_dir)
 
     _run(
         [
@@ -151,8 +152,8 @@ def test_manifest_includes_ci_artifacts_when_present(tmp_path: Path) -> None:
             str(REPO_ROOT / "scripts" / "make_evidence_pack.py"),
             "--build-dir",
             str(build_dir),
-            "--docs-dir",
-            str(docs_dir),
+            "--governance-dir",
+            str(governance_dir),
             "--evidence-dir",
             str(evidence_dir),
             "--out-tgz",
@@ -170,12 +171,12 @@ def test_manifest_includes_ci_artifacts_when_present(tmp_path: Path) -> None:
 def test_manifest_hashes_match_file_contents(tmp_path: Path) -> None:
     """SHA256 hashes in the manifest must match the actual file contents."""
     build_dir = tmp_path / "build"
-    docs_dir = tmp_path / "docs"
+    governance_dir = tmp_path / "governance"
     evidence_dir = tmp_path / "evidence"
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
     _minimal_build_dir(build_dir, REPO_ROOT)
-    _minimal_docs_dir(docs_dir)
+    _minimal_governance_dir(governance_dir)
 
     _run(
         [
@@ -183,8 +184,8 @@ def test_manifest_hashes_match_file_contents(tmp_path: Path) -> None:
             str(REPO_ROOT / "scripts" / "make_evidence_pack.py"),
             "--build-dir",
             str(build_dir),
-            "--docs-dir",
-            str(docs_dir),
+            "--governance-dir",
+            str(governance_dir),
             "--evidence-dir",
             str(evidence_dir),
             "--out-tgz",

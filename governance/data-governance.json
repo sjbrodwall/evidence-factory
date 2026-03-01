@@ -1,0 +1,5 @@
+{
+  "schema_version": "1",
+  "title": "Data governance",
+  "body": "Synthetic-only. No production/user data. No raw prompts/logs. No secrets in repo."
+}
