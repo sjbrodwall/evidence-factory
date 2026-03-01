@@ -1,5 +1,0 @@
-
-[dev]
-pip-tools
-pytest
-ruff
