@@ -1,8 +1,16 @@
-# Evidence Factory (POC)
+# Evidence Factory: make governance compile.
 
-This repository is a proof-of-concept **evidence factory** for ML systems: it turns governance requirements into **machine-verifiable evidence** and enforces them with **policy-as-code** in CI.
+This repository is a proof-of-concept evidence factory for ML systems: it turns governance requirements into cryptographically verifiable evidence and enforces them with policy-as-code in CI. If the governance requirements aren't met, the build fails. Retroactive falsification is detectable.  
 
-**Design goal:** make governance constraints compile.
+**The evidence produced by this PoC does *not* by itself constitute full legal compliance.**
+
+Verification layers:
+1. **Existence:** the documentation files specified in evidence.rego exist and aren't empty. ✓ 
+2. **Structure:** the documentation files include the structure for the information required by the AI Act.
+3. **Coherence:** the information in the documentation is internally consistent and semantically valid.
+4. **Grounded validity:** the documentation's claims about the system are true as the system and the world around it change.    
+
+Currently the system is working at **layer 1** (verification of the existence of the specified files). Layer 2 is next on the docket; 3 and 4 are open research questions. 
 
 ## Table of contents
 
@@ -20,12 +28,7 @@ This repository is a proof-of-concept **evidence factory** for ML systems: it tu
 
 ## Scope
 
-- **Low-risk** POC scenario (advisory/drafting use, human review required).
-- **Synthetic data only**.
-- Model-in-the-box (the model is a build artifact produced by this repo).
-- This is a **kernel**, not a platform: no dashboards, no bespoke infra.
-
-This POC supports parts of AI Act–style obligations (traceability, documentation inputs, risk notes, oversight plan, etc.) by producing verifiable evidence artifacts. It does **not** by itself constitute full legal compliance.
+This PoC uses a low-risk, decision-support scenario with synthetic data. The ML aspects are deliberately minimal; the governance architecture is the primary exhibit.  The model is a build artifact produced by the repo itself.  There are no dashboards or bespoke infra--this is a kernel, not a platform.  
 
 ## Repository layout
 
@@ -40,7 +43,7 @@ This POC supports parts of AI Act–style obligations (traceability, documentati
 
 ## Governance inputs (`governance/`)
 
-The `governance/` folder holds structured JSON governance inputs that are treated as **required evidence** and included in the evidence bundle. Filenames are treated as a stable API. Each file has `schema_version`, `title`, and `body`.
+The `governance/` folder holds (barely) structured JSON governance inputs that are treated as **required evidence** and included in the evidence bundle. Filenames are treated as a stable API. Each file has `schema_version`, `title`, and `body`.
 
 Expected files (minimum kernel):
 
@@ -50,7 +53,7 @@ Expected files (minimum kernel):
 - `governance/risk-notes.json`
 - `governance/traceability.json`
 
-For agent conventions and enforcement (e.g. not adding/renaming these without alignment), see **AGENTS.md** § Repo conventions.
+For agent conventions and enforcement (e.g. not adding/renaming these without alignment), see AGENTS.md § Repo conventions.
 
 ## Architecture
 
@@ -96,7 +99,7 @@ Gates are intentionally strict about:
 - basic structural sanity (e.g., non-empty governance files)
 - CI-only requirements (SBOM and vuln scan outputs)
 
-Policy failures must be **actionable** (e.g., “missing required file: governance/human-oversight.json”).
+Policy failures must be *actionable* (e.g., “missing required file: governance/human-oversight.json”).
 
 ## CI workflow (high level)
 
@@ -141,26 +144,26 @@ Guidelines:
 - use minimal, repo-scoped GitHub credentials
 - do not store tokens in tracked files
 
-For how AI agents should work in this repo (branching, diffs, verification, change policy), see **AGENTS.md**.
+For how AI agents should work in this repo (branching, diffs, verification, change policy), see AGENTS.md.
 
 ## Testing strategy
 
-Tests are prioritized where the value proposition lives: **evidence assembly** and **policy-as-code**.
+Tests are prioritized where the value proposition lives: evidence assembly and policy-as-code.
 
 - **Evidence pack** — Tests for `scripts/make_evidence_pack.py` (and equivalent logic) should assert that the manifest covers exactly the expected files (required governance files, model artifacts, eval report, and when present SBOM/Trivy). That protects the evidence-assembly contract.
 - **Policy** — Rego/Conftest tests for `policy/evidence.rego` ensure gates are not silently broken by refactors; policy is the main enforcement surface.
 
-The ML code in `src/` (train + eval) is a minimal placeholder so the pipeline has model artifacts to bundle. Tests for train determinism or eval report schema are **optional contract tests** for that placeholder behavior; they are not the primary testing focus.
+The ML code in `src/` (train + eval) is a minimal placeholder so the pipeline has model artifacts to bundle. Tests for train determinism or eval report schema are optional contract tests for that placeholder behavior; they are not the primary testing focus.
 
 **Run tests locally:** `pip install -r requirements-dev.txt` then `python -m pytest tests/ -v`. Policy unit tests: `conftest verify --policy policy` (requires [Conftest](https://www.conftest.dev/)).
 
 ## Anonymity and data handling
 
-This repo must not contain sensitive data: synthetic data only; no secrets, internal URLs, PII, or internal docs. Full list and agent enforcement: **AGENTS.md** § Anonymity and data handling. If unsure, omit the material and leave a TODO.
+This repo must not contain sensitive data: synthetic data only; no secrets, internal URLs, PII, or internal docs. Full list and agent enforcement: AGENTS.md § Anonymity and data handling. If unsure, omit the material and leave a TODO.
 
 ## Local quickstart (example)
 
-Use **Python 3.13** (CI and pinned deps use 3.13; see `.python-version`).
+Use Python 3.13 (CI and pinned deps use 3.13; see `.python-version`).
 
 ```bash
 python -m venv .venv
