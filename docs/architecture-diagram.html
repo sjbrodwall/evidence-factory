@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evidence Factory — Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e4e9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: #8b8fa3;
+    margin-bottom: 40px;
+    font-style: italic;
+  }
+
+  .diagram {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    position: relative;
+  }
+
+  /* Layer cards */
+  .layer {
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .layer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .kernel {
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+  }
+  .kernel::before {
+    background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(99,102,241,0.1));
+  }
+
+  .factory {
+    background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.03));
+  }
+  .factory::before {
+    background: linear-gradient(135deg, rgba(16,185,129,0.4), rgba(16,185,129,0.1));
+  }
+
+  .layer-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+  .kernel .layer-label { color: #818cf8; }
+  .factory .layer-label { color: #34d399; }
+
+  .layer-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .layer-desc {
+    font-size: 13px;
+    color: #8b8fa3;
+    margin-bottom: 20px;
+  }
+
+  /* File / item lists */
+  .items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .item-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .kernel .item-icon { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .factory .item-icon { background: rgba(16,185,129,0.15); color: #34d399; }
+
+  .item-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c4c7d4;
+  }
+
+  a.item, a.bundle-item {
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  a.item:hover, a.bundle-item:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .item-text .desc {
+    font-size: 11px;
+    color: #6b6f82;
+    margin-top: 2px;
+  }
+
+  /* Pipeline section */
+  .pipeline-section {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  .pipeline-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .pipeline-header .layer-label {
+    color: #f59e0b;
+    margin-bottom: 4px;
+  }
+
+  .pipeline-header .layer-title {
+    font-size: 18px;
+  }
+
+  .pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    min-width: 100px;
+    position: relative;
+  }
+
+  .stage-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .stage-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e4e9;
+  }
+
+  .stage-detail {
+    font-size: 10px;
+    color: #6b6f82;
+    text-align: center;
+  }
+
+  .stage-icon.train { background: rgba(99,102,241,0.15); }
+  .stage-icon.eval { background: rgba(168,85,247,0.15); }
+  .stage-icon.sbom { background: rgba(236,72,153,0.15); }
+  .stage-icon.trivy { background: rgba(244,63,94,0.15); }
+  .stage-icon.assemble { background: rgba(245,158,11,0.15); }
+  .stage-icon.policy { background: rgba(16,185,129,0.15); }
+  .stage-icon.sign { background: rgba(6,182,212,0.15); }
+
+  .arrow {
+    color: #3b3f54;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Evidence bundle */
+  .bundle-section {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  .bundle {
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bundle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.35), rgba(245,158,11,0.08));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .bundle .layer-label { color: #f59e0b; }
+
+  .bundle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .bundle-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .bundle-item code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #c4c7d4;
+  }
+
+  .bundle-item .bi-icon {
+    font-size: 13px;
+  }
+
+  /* Principles bar */
+  .principles {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .principle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #6b6f82;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .principle span { font-size: 13px; }
+
+  /* Connection arrows between layers */
+  .connection-label {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 8px 0;
+    position: relative;
+  }
+
+  .connection-label::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  }
+
+  .connection-label span {
+    position: relative;
+    background: #0f1117;
+    padding: 0 16px;
+    font-size: 11px;
+    color: #6b6f82;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Evidence Factory</h1>
+<p class="subtitle">"Make governance compile."</p>
+
+<div class="diagram">
+
+  <!-- Layer 1: Governance Kernel -->
+  <div class="layer kernel">
+    <div class="layer-label">Layer 1 — Definition</div>
+    <div class="layer-title">Governance Kernel</div>
+    <div class="layer-desc">Defines what must exist for a release to be acceptable</div>
+    <div class="items">
+      <a class="item" href="https://github.com/sjbrodwall/evidence-factory/tree/main/governance" target="_blank">
+        <div class="item-icon">📄</div>
+        <div class="item-text">
+          <code>governance/*.json</code>
+          <div class="desc">Structured inputs — purpose, oversight, data, risk, traceability</div>
+        </div>
+      </a>
+      <a class="item" href="https://github.com/sjbrodwall/evidence-factory/blob/main/policy/evidence.rego" target="_blank">
+        <div class="item-icon">🔒</div>
+        <div class="item-text">
+          <code>policy/evidence.rego</code>
+          <div class="desc">OPA rules — required files, structural checks, CI gates</div>
+        </div>
+      </a>
+      <a class="item" href="https://github.com/sjbrodwall/evidence-factory/blob/main/README.md#governance-inputs-governance" target="_blank">
+        <div class="item-icon">📐</div>
+        <div class="item-text">
+          <div style="font-size:12px; color:#c4c7d4;">Stable filename API</div>
+          <div class="desc">Schema + naming conventions = machine-verifiable contract</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Layer 2: Evidence Factory -->
+  <div class="layer factory">
+    <div class="layer-label">Layer 2 — Enforcement</div>
+    <div class="layer-title">Evidence Factory</div>
+    <div class="layer-desc">Enforces the kernel and produces verifiable evidence</div>
+    <div class="items">
+      <a class="item" href="https://github.com/sjbrodwall/evidence-factory/tree/main/src" target="_blank">
+        <div class="item-icon">🏋️</div>
+        <div class="item-text">
+          <code>src/train.py</code> · <code>src/eval.py</code>
+          <div class="desc">Deterministic training + evaluation (model-in-the-box)</div>
+        </div>
+      </a>
+      <a class="item" href="https://github.com/sjbrodwall/evidence-factory/blob/main/scripts/make_evidence_pack.py" target="_blank">
+        <div class="item-icon">📦</div>
+        <div class="item-text">
+          <code>scripts/make_evidence_pack.py</code>
+          <div class="desc">Assembles artifacts → content-addressed manifest → .tgz</div>
+        </div>
+      </a>
+      <a class="item" href="https://github.com/sjbrodwall/evidence-factory/blob/main/.github/workflows/evidence-factory.yml" target="_blank">
+        <div class="item-icon">⚙️</div>
+        <div class="item-text">
+          <code>.github/workflows/evidence-factory.yml</code>
+          <div class="desc">CI pipeline — SBOM, vuln scan, policy gate, signing</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Connection -->
+  <div class="connection-label"><span>▼&ensp; CI PIPELINE FLOW &ensp;▼</span></div>
+
+  <!-- Pipeline -->
+  <div class="pipeline-section">
+    <div class="pipeline">
+      <div class="stage">
+        <div class="stage-icon train">🧠</div>
+        <div class="stage-name">Train</div>
+        <div class="stage-detail">Deterministic<br>seed=42</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stage">
+        <div class="stage-icon eval">📊</div>
+        <div class="stage-name">Evaluate</div>
+        <div class="stage-detail">Metrics tied<br>to model hash</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stage">
+        <div class="stage-icon sbom">📋</div>
+        <div class="stage-name">SBOM</div>
+        <div class="stage-detail">SPDX JSON<br>supply chain</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stage">
+        <div class="stage-icon trivy">🛡️</div>
+        <div class="stage-name">Trivy Scan</div>
+        <div class="stage-detail">HIGH/CRITICAL<br>fail on vuln</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stage">
+        <div class="stage-icon assemble">🗂️</div>
+        <div class="stage-name">Assemble</div>
+        <div class="stage-detail">SHA-256 manifest<br>+ git SHA</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stage">
+        <div class="stage-icon policy">✅</div>
+        <div class="stage-name">Policy Gate</div>
+        <div class="stage-detail">Conftest / OPA<br>pass or fail</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="stage">
+        <div class="stage-icon sign">🔏</div>
+        <div class="stage-name">Sign</div>
+        <div class="stage-detail">Sigstore keyless<br>(main only)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection -->
+  <div class="connection-label"><span>▼&ensp; OUTPUT &ensp;▼</span></div>
+
+  <!-- Evidence Bundle -->
+  <div class="bundle-section">
+    <div class="bundle">
+      <div class="layer-label">Artifact</div>
+      <div class="layer-title">Evidence Bundle</div>
+      <div class="layer-desc" style="color:#8b8fa3;">Immutable, content-addressed, signed — receipts, not slide decks</div>
+      <div class="bundle-grid">
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/actions/runs/22828637104" target="_blank"><span class="bi-icon">🧾</span><code>manifest.json</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/blob/main/src/train.py" target="_blank"><span class="bi-icon">🤖</span><code>model.joblib</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/blob/main/src/eval.py" target="_blank"><span class="bi-icon">📈</span><code>eval.json</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/tree/main/governance" target="_blank"><span class="bi-icon">🏛️</span><code>governance/*.json</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/actions/runs/22828637104" target="_blank"><span class="bi-icon">📋</span><code>sbom.spdx.json</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/actions/runs/22828637104" target="_blank"><span class="bi-icon">🛡️</span><code>trivy.sarif</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/actions/runs/22828637104" target="_blank"><span class="bi-icon">🔐</span><code>*.sigstore.json</code></a>
+        <a class="bundle-item" href="https://github.com/sjbrodwall/evidence-factory/actions/runs/22828637104" target="_blank"><span class="bi-icon">📦</span><code>evidence-pack.tgz</code></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Principles -->
+  <div class="principles">
+    <div class="principle"><span>🔗</span> Content-addressed</div>
+    <div class="principle"><span>📜</span> Append-only</div>
+    <div class="principle"><span>🔁</span> Reproducible</div>
+    <div class="principle"><span>⚖️</span> Policy-as-code</div>
+    <div class="principle"><span>🔍</span> Auditable</div>
+    <div class="principle"><span>🚫</span> Fail fast &amp; loud</div>
+  </div>
+
+</div>
+
+</body>
+</html>
