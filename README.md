@@ -1,3 +1,5 @@
+# [Moved to new URL](https://github.com/navikt/evidence-factory)
+
 # Evidence Factory: make governance compile.
 
 This repository is a proof-of-concept evidence factory for ML systems: it turns governance requirements into cryptographically verifiable evidence and enforces them with policy-as-code in CI. If the governance requirements aren't met, the build fails. Retroactive falsification is detectable.  
